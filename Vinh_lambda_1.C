@@ -29,7 +29,9 @@ static const double m2kaon=pow(493.677e-3,2);
 static const double mkaon=493.677e-3;
 static const double m2proton=0.880354511;
 static const double pTmax=3.8;
-static const double pTmin=0.4;
+static const double pTmin=0.3;
+static const double bin[15]={0.4,0.6,0.8,1.0,1.2,1.4,1.6,1.8,2.0,2.3,2.6,2.9,3.2,3.5,3.8};
+static const int nbin=14;
 static const double pi=3.141592654;
 static const float xmin=0.95;
 static const float xmax=1.25;
@@ -55,9 +57,9 @@ TH1F *hinvLambdaE5 = new TH1F("hinvLambdaE5","East Arm #Lambda-baryon",300,0.98,
 TH1F *hinvLambdaW5 = new TH1F("hinvLambdaW5","West Arm #Lambda-baryon",300,0.98,1.28);
 TH1F *hinvLambda5 = new TH1F("hinvLambda5","#Lambda-baryon",300,0.98,1.28);
 
-TH1F *hinvLambdaE6 = new TH1F("hinvLambdaE6","East arm #Lambda^{0}, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
-TH1F *hinvLambdaW6 = new TH1F("hinvLambdaW6","West arm #Lambda^{0}, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
-TH1F *hinvLambda6 = new TH1F("hinvLambda6","Both arm #Lambda^{0}, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
+TH1F *hinvLambdaE6 = new TH1F("hinvLambdaE6","East Arm #Lambda-baryon",300,0.98,1.28);
+TH1F *hinvLambdaW6 = new TH1F("hinvLambdaW6","West Arm #Lambda-baryon",300,0.98,1.28);
+TH1F *hinvLambda6 = new TH1F("hinvLambda6","#Lambda-baryon",300,0.98,1.28);
 
 TH1F *hinvSTE1 = new TH1F("hinvSTE1","East Arm #ST-baryon",300,0.98,1.28);
 TH1F *hinvSTW1 = new TH1F("hinvSTW1","West Arm #ST-baryon",300,0.98,1.28);
@@ -79,9 +81,9 @@ TH1F *hinvSTE5 = new TH1F("hinvSTE5","East Arm #ST-baryon",300,0.98,1.28);
 TH1F *hinvSTW5 = new TH1F("hinvSTW5","West Arm #ST-baryon",300,0.98,1.28);
 TH1F *hinvST5 = new TH1F("hinvST5","#ST-baryon",300,0.98,1.28);
 
-TH1F *hinvSTE6 = new TH1F("hinvSTE6","East arm neg.charged particle-proton pairs, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
-TH1F *hinvSTW6 = new TH1F("hinvSTW6","West arm neg.charged particle-proton pairs, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
-TH1F *hinvST6 = new TH1F("hinvST6","Both arm neg.charged particle-proton pairs, #sqrt{s_{NN}}=62 GeV, cent: 20-60%, p_{T}^{#Lambda}>1.8 GeV/c",150,0.98,1.28);
+TH1F *hinvSTE6 = new TH1F("hinvSTE6","East Arm #ST-baryon",300,0.98,1.28);
+TH1F *hinvSTW6 = new TH1F("hinvSTW6","West Arm #ST-baryon",300,0.98,1.28);
+TH1F *hinvST6 = new TH1F("hinvST6","#ST-baryon",300,0.98,1.28);
 
 TH1F *hpE = new TH1F("hpE","Proton East",200,-0.2,1.5);
 TH1F *hpW = new TH1F("hpW","Proton West",200,-0.2,1.5);
@@ -178,7 +180,7 @@ float Vinh::IsKaonE(float m2tof, float pt){
 }
 void Vinh::ana_event(int jentry, int ientry) {
     // centrality cut and vertex +/- 30 cm cut
-    if(fabs(bbcz)<30 && cent>=20 && cent<=60){//event selection, centrality selection
+    if(fabs(bbcz)<30 && cent>=10 && cent<=60){//event selection, centrality selection
         if(ientry%100000==0) cout << ientry << endl;
         vector<trk> pW,pE,piW,piE,negW,negE;
         for(int i=0;i<mh;i++) {//track loop
@@ -318,7 +320,6 @@ void Vinh::ana_event(int jentry, int ientry) {
               if(pt>1.2 && pt<2.8 && 3*pTneg<pTp) {hinvSTW4->Fill(MinvST);hinvST4->Fill(MinvST);}
               if(pt>1.8 && pt<3.2 && 3*pTneg<pTp) {hinvSTW5->Fill(MinvST);hinvST5->Fill(MinvST);}
               if(pt>1.8 && 3*pTneg<pTp) {hinvSTW6->Fill(MinvST);hinvST6->Fill(MinvST);}                              
-
           }
         }//end of loop for east lamda           
     }// end of event selection, end of centrality selection    
@@ -397,19 +398,3 @@ void Vinh::ana_end(TString outFile) {
   c7 -> Write();
   d_outfile -> Close();
 }
-void loop_a_list_of_tree(char* inName,TString outName){
-  cout << "Starting the invMassLambda procedure" << endl;
-  cout << "Input argument: " << inName << endl;
-  Vinh *ana = new Vinh();
-  ifstream ifile(inName);
-  char filename[200];
-  int nfiles=0;
-  while(ifile.getline(filename,200)) {
-    cout << nfiles << ": processing " << filename << endl;
-    ana->loop_a_file(filename);
-    nfiles++;
-  }
-  ana->ana_end(outName.Data());
-  cout << "Histfile written!" << endl;
-}
-
